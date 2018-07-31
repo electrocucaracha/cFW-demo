@@ -1,0 +1,10 @@
+version: '3'
+
+services:
+  packetgen:
+    image: electrocucaracha/packetgen
+    build:
+      context: ./packetgen
+      args:
+        HTTP_PROXY: $HTTP_PROXY
+        HTTPS_PROXY: $HTTPS_PROXY
