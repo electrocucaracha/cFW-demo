@@ -61,9 +61,12 @@ function install_docker_compose {
     pip install docker-compose
 }
 
+echo 'vm.nr_hugepages = 1024' >> /etc/sysctl.conf
+sysctl -p
+
 install_docker
 install_docker_compose
 
-for pod in packetgen; do
-   docker-compoes -f $pod.yml up
-done
+cd /vagrant
+#docker-compose build
+docker-compose up -d

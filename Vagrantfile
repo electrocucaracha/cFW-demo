@@ -3,7 +3,11 @@
 
 Vagrant.configure("2") do |config|
   config.vm.box = "elastic/ubuntu-16.04-x86_64"
+  config.vm.hostname = "demo"
   config.vm.provision 'shell', path: 'postinstall.sh'
+  config.vm.network :private_network, :ip => "192.168.10.5", :type => :static # unprotected_private_net_cidr
+  config.vm.network :private_network, :ip => "192.168.20.5", :type => :static # protected_private_net_cidr
+  config.vm.network :private_network, :ip => "10.10.12.5", :type => :static, :netmask => "16" # onap_private_net_cidr
 
   if ENV['http_proxy'] != nil and ENV['https_proxy'] != nil
     if not Vagrant.has_plugin?('vagrant-proxyconf')
