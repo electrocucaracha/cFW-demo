@@ -14,21 +14,21 @@ ENV demo_artifacts_version "1.3.0"
 ENV protected_net_gw "192.168.20.100"
 ENV unprotected_net "192.168.10.0/24"
 
-RUN apt-get update && apt-get install -y -qq wget darkstat net-tools \
- && sed -i "s/START_DARKSTAT=.*/START_DARKSTAT=yes/g;s/INTERFACE=.*/INTERFACE=\"-i eth1\"/g" /etc/darkstat/init.cfg 
+RUN apt-get update && apt-get install -y -qq wget net-tools
 
 WORKDIR /opt
-EXPOSE 667
 
 RUN wget "https://git.onap.org/demo/plain/vnfs/vFW/scripts/v_sink_init.sh" \
  && chmod +x v_sink_init.sh 
 
-RUN mkdir -p /opt/config/ \
- && echo $protected_net_cidr > /opt/config/protected_net_cidr.txt \
- && echo $fw_ipaddr > /opt/config/fw_ipaddr.txt \
- && echo $sink_ipaddr > /opt/config/sink_ipaddr.txt \
- && echo $demo_artifacts_version > /opt/config/demo_artifacts_version.txt \
- && echo $protected_net_gw > /opt/config/protected_net_gw.txt \
- && echo $unprotected_net > /opt/config/unprotected_net.txt
+RUN mkdir -p config/ \
+ && echo $protected_net_cidr > config/protected_net_cidr.txt \
+ && echo $fw_ipaddr > config/fw_ipaddr.txt \
+ && echo $sink_ipaddr > config/sink_ipaddr.txt \
+ && echo $demo_artifacts_version > config/demo_artifacts_version.txt \
+ && echo $protected_net_gw > config/protected_net_gw.txt \
+ && echo $unprotected_net > config/unprotected_net.txt
 
-CMD ["./v_sink_init.sh"]
+# NOTE: this script executes $ route add -net 192.168.10.0 netmask 255.255.255.0 gw 192.168.20.100
+# which results in this error -> SIOCADDRT: File exists
+#CMD ["./v_sink_init.sh"]

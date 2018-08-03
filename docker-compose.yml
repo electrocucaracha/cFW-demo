@@ -28,3 +28,11 @@ services:
       args:
         HTTP_PROXY: $HTTP_PROXY
         HTTPS_PROXY: $HTTPS_PROXY
+  darkstat:
+    network_mode: "host"
+    image: electrocucaracha/darkstat
+    build:
+      context: ./darkstat
+      args:
+        HTTP_PROXY: $HTTP_PROXY
+        HTTPS_PROXY: $HTTPS_PROXY
