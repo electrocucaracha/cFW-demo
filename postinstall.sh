@@ -68,5 +68,16 @@ install_docker
 install_docker_compose
 
 cd /vagrant
-#docker-compose build
+# build vpp docker image
+BUILD_ARGS="--no-cache"
+if [ $HTTP_PROXY ]; then
+    BUILD_ARGS+=" --build-arg HTTP_PROXY=${HTTP_PROXY}"
+fi
+if [ $HTTPS_PROXY ]; then
+    BUILD_ARGS+=" --build-arg HTTPS_PROXY=${HTTPS_PROXY}"
+fi
+pushd vpp
+docker build ${BUILD_ARGS} -t electrocucaracha/vpp:latest .
+popd
+
 docker-compose up -d

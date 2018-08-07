@@ -1,4 +1,4 @@
-FROM ubuntu:16.04
+FROM electrocucaracha/vpp
 MAINTAINER Victor Morales <electrocucaracha@gmail.com>
 
 ARG HTTP_PROXY=${HTTP_PROXY}
@@ -13,14 +13,9 @@ ENV fw_ipaddr "192.168.10.100"
 ENV sink_ipaddr "192.168.20.250"
 ENV demo_artifacts_version "1.3.0"
 
-RUN apt-get update && apt-get install -y -qq apt-transport-https \
- && echo "deb [trusted=yes] https://nexus.fd.io/content/repositories/fd.io.stable.1609.ubuntu.xenial.main/ ./" | tee -a /etc/apt/sources.list.d/99fd.io.list \
- && apt-get update
-
 RUN apt-get install -y -qq wget openjdk-8-jre bridge-utils net-tools \
- bsdmainutils vpp vpp-lib vpp-plugins 
+ bsdmainutils
 
-COPY 80-vpp.conf /etc/sysctl.d/80-vpp.conf
 WORKDIR /opt
 EXPOSE 8183
 
