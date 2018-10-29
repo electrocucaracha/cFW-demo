@@ -30,5 +30,5 @@ RUN mkdir -p config/ \
  && echo $unprotected_net > config/unprotected_net.txt
 
 # NOTE: this script executes $ route add -net 192.168.10.0 netmask 255.255.255.0 gw 192.168.20.100
-# which results in this error -> SIOCADDRT: File exists
-#CMD ["./v_sink_init.sh"]
+# which results in this error if doesn't have all nics required  -> SIOCADDRT: File exists
+CMD ["./v_sink_init.sh"]
