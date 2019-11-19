@@ -1,16 +1,10 @@
 FROM ubuntu:16.04
 MAINTAINER Victor Morales <electrocucaracha@gmail.com>
 
-ARG HTTP_PROXY=${HTTP_PROXY}
-ARG HTTPS_PROXY=${HTTPS_PROXY}
-
-ENV http_proxy $HTTP_PROXY
-ENV https_proxy $HTTPS_PROXY
-
 ENV protected_net_cidr "192.168.20.0/24"
 ENV fw_ipaddr "192.168.10.100"
 ENV sink_ipaddr "192.168.20.250"
-ENV demo_artifacts_version "1.3.0"
+ENV demo_artifacts_version "1.6.0"
 ENV protected_net_gw "192.168.20.100"
 ENV unprotected_net "192.168.10.0/24"
 

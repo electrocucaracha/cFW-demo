@@ -1,20 +1,15 @@
 FROM electrocucaracha/vpp
 MAINTAINER Victor Morales <electrocucaracha@gmail.com>
 
-ARG HTTP_PROXY=${HTTP_PROXY}
-ARG HTTPS_PROXY=${HTTPS_PROXY}
-
-ENV http_proxy $HTTP_PROXY
-ENV https_proxy $HTTPS_PROXY
 ENV repo_url "https://nexus.onap.org/content/repositories/staging/org/onap/demo/vnf"
 
 ENV protected_net_cidr "192.168.20.0/24"
 ENV fw_ipaddr "192.168.10.100"
 ENV sink_ipaddr "192.168.20.250"
-ENV demo_artifacts_version "1.3.0"
+ENV demo_artifacts_version "1.6.0"
 
 RUN apt-get install -y -qq wget openjdk-8-jre bridge-utils net-tools \
- bsdmainutils make gcc libcurl4-gnutls-dev
+ bsdmainutils make gcc libcurl4-gnutls-dev iproute2
 
 WORKDIR /opt
 
