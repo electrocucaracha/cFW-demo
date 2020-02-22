@@ -26,7 +26,7 @@ function install_docker_compose {
 echo 'vm.nr_hugepages = 1024' >> /etc/sysctl.conf
 sysctl -p
 
-curl -fsSL http://bit.ly/pkgInstall | PKG=docker bash
+curl -fsSL http://bit.ly/install_pkg | PKG=docker bash
 install_docker_compose
 
 sudo docker build --no-cache -t electrocucaracha/vpp:latest -f vpp/Dockerfile vpp
