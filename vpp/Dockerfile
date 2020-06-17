@@ -1,11 +1,16 @@
-FROM ubuntu:16.04
+FROM ubuntu:18.04
 MAINTAINER Victor Morales <electrocucaracha@gmail.com>
 
-RUN apt-get update && apt-get install -y -qq apt-transport-https \
- && echo "deb [trusted=yes] https://nexus.fd.io/content/repositories/fd.io.stable.1609.ubuntu.xenial.main/ ./" | tee -a /etc/apt/sources.list.d/99fd.io.list \
- && apt-get update \
- && apt-get install -y -qq vpp vpp-lib vpp-plugins 
+ENV VERSION "19.01.2-release"
 
-COPY 80-vpp.conf /etc/sysctl.d/80-vpp.conf
+RUN apt-get update \
+ && apt-get install -y -qq --no-install-recommends curl ca-certificates gnupg2 \
+ && echo "deb [trusted=yes] https://packagecloud.io/fdio/release/ubuntu bionic main" | tee /etc/apt/sources.list.d/99fd.io.list \
+ && curl -L https://packagecloud.io/fdio/release/gpgkey | apt-key add - \
+ && mkdir -p /var/log/vpp/ \
+ && apt-get update \
+ && apt-get install -y -qq --no-install-recommends vpp=$VERSION vpp-lib=$VERSION vpp-plugins=$VERSION
+
+COPY startup.conf /etc/vpp/startup.conf
 
 CMD ["/usr/bin/vpp", "-c", "/etc/vpp/startup.conf"]
