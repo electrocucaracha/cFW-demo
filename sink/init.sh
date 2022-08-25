@@ -13,5 +13,5 @@ set -o xtrace
 set -o errexit
 set -o nounset
 
-ip route add $UNPROTECTED_NET via $PROTECTED_NET_GW
+ip route add "$UNPROTECTED_NET" via "$PROTECTED_NET_GW"
 /usr/sbin/darkstat --no-daemon --verbose -i eth0

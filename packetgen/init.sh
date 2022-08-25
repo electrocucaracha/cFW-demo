@@ -16,8 +16,15 @@ set -o nounset
 echo 'start... vpp'
 /usr/bin/vpp -c /etc/vpp/startup.conf
 echo 'wait vpp be up ...'
+attempt_counter=0
+max_attempts=5
 until vppctl show ver; do
-    sleep 1;
+    if [ ${attempt_counter} -eq ${max_attempts} ]; then
+        echo "Max attempts reached"
+        exit 1
+    fi
+    attempt_counter=$((attempt_counter + 1))
+    sleep $((attempt_counter * 2))
 done
 
 # Configure VPP for vPacketGenerator
@@ -35,7 +42,7 @@ vppctl set int state loop0 up
 
 # Install packet streams
 for i in $(seq 1 10); do
-    cat <<EOL > "/opt/pg_streams/stream_fw_udp"
+    cat <<EOL >"/opt/pg_streams/stream_fw_udp"
 packet-generator new {
   name fw_udp$i
   rate 10

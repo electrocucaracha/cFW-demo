@@ -16,8 +16,15 @@ set -o nounset
 echo 'start... vpp'
 /usr/bin/vpp -c /etc/vpp/startup.conf
 echo 'wait vpp be up ...'
+attempt_counter=0
+max_attempts=5
 until vppctl show ver; do
-    sleep 1;
+    if [ ${attempt_counter} -eq ${max_attempts} ]; then
+        echo "Max attempts reached"
+        exit 1
+    fi
+    attempt_counter=$((attempt_counter + 1))
+    sleep $((attempt_counter * 2))
 done
 
 # Configure VPP for vFirewall
