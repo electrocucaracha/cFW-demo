@@ -1,15 +1,22 @@
 FROM ubuntu:18.04
-MAINTAINER Victor Morales <electrocucaracha@gmail.com>
 
-ENV VERSION "19.01.2-release"
+ARG VERSION=21.10.1
 
-RUN apt-get update \
- && apt-get install -y -qq --no-install-recommends curl ca-certificates gnupg2 \
- && echo "deb [trusted=yes] https://packagecloud.io/fdio/release/ubuntu bionic main" | tee /etc/apt/sources.list.d/99fd.io.list \
- && curl -L https://packagecloud.io/fdio/release/gpgkey | apt-key add - \
- && mkdir -p /var/log/vpp/ \
- && apt-get update \
- && apt-get install -y -qq --no-install-recommends vpp=$VERSION vpp-lib=$VERSION vpp-plugins=$VERSION
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+RUN apt-get update && apt-get install -y -qq --no-install-recommends \
+  curl=7.58.0-2ubuntu3.19 \
+  ca-certificates=20211016~18.04.1 \
+  gnupg2=2.2.4-1ubuntu1.6 \
+  && rm -rf /var/lib/apt/lists/*
+
+ RUN echo "deb [trusted=yes] https://packagecloud.io/fdio/release/ubuntu bionic main" | tee /etc/apt/sources.list.d/99fd.io.list \
+  && curl -L https://packagecloud.io/fdio/release/gpgkey | apt-key add - \
+  && mkdir -p /var/log/vpp/ \
+  && apt-get update && apt-get install -y -qq --no-install-recommends \
+  vpp=$VERSION-release \
+  vpp-plugin-core=$VERSION-release \
+  vpp-plugin-dpdk=$VERSION-release \
+  && rm -rf /var/lib/apt/lists/*
 
 COPY startup.conf /etc/vpp/startup.conf
 

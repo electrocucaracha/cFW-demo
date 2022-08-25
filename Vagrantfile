@@ -64,7 +64,7 @@ Vagrant.configure("2") do |config|
   end
 
   config.vm.provider :libvirt do |v, override|
-    override.vm.synced_folder "./", "/vagrant", type: "nfs", nfs_version: 4
+    override.vm.synced_folder "./", "/vagrant", type: "nfs", nfs_version: ENV.fetch("VAGRANT_NFS_VERSION", 3)
     #    v.memorybacking :access, :mode => "shared"
     v.random_hostname = true
     v.random_hostname = true
@@ -95,7 +95,7 @@ Vagrant.configure("2") do |config|
     cd /vagrant
     docker network create --subnet 10.10.0.0/16 --opt com.docker.network.bridge.name=docker_gwbridge docker_gwbridge
     docker swarm init --advertise-addr 10.0.2.15
-    docker build --no-cache -t vpp vpp/
+    docker build --no-cache -t vpp:21.10.1 --build-arg VERSION=21.10.1 vpp/
     docker-compose up -d
     docker image prune --force
     #curl -X PUT \
