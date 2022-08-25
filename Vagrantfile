@@ -1,32 +1,49 @@
+# frozen_string_literal: true
+
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 # SPDX-license-identifier: Apache-2.0
 ##############################################################################
-# Copyright (c) 2019
+# Copyright (c) 2019,2022
 # All rights reserved. This program and the accompanying materials
 # are made available under the terms of the Apache License, Version 2.0
 # which accompanies this distribution, and is available at
 # http://www.apache.org/licenses/LICENSE-2.0
 ##############################################################################
 
-$no_proxy = ENV['NO_PROXY'] || ENV['no_proxy'] || "127.0.0.1,localhost"
+no_proxy = ENV["NO_PROXY"] || ENV["no_proxy"] || "127.0.0.1,localhost"
 # NOTE: This range is based on vagrant-libvirt network definition CIDR 192.168.121.0/24
 (1..254).each do |i|
-  $no_proxy += ",192.168.121.#{i}"
+  no_proxy += ",192.168.121.#{i}"
 end
-$no_proxy += ",10.0.2.15"
-$socks_proxy = ENV['socks_proxy'] || ENV['SOCKS_PROXY'] || ""
+no_proxy += ",10.0.2.15"
 
 Vagrant.configure("2") do |config|
   config.vm.provider :libvirt
   config.vm.provider :virtualbox
 
-  config.vm.box = "generic/ubuntu1804"
-  config.vm.box_version = "3.0.8"
-  config.vm.synced_folder './', '/vagrant'
+  config.vm.box = "generic/ubuntu2004"
+  config.vm.box_check_update = false
+  config.vm.synced_folder "./", "/vagrant"
 
-  [:virtualbox, :libvirt].each do |provider|
-  config.vm.provider provider do |p|
+  host = RbConfig::CONFIG["host_os"]
+  case host
+  when /darwin/
+    mem = `sysctl -n hw.memsize`.to_i / 1024
+  when /linux/
+    mem = `grep 'MemTotal' /proc/meminfo | sed -e 's/MemTotal://' -e 's/ kB//'`.to_i
+  when /mswin|mingw|cygwin/
+    mem = `wmic computersystem Get TotalPhysicalMemory`.split[1].to_i / 1024
+  end
+  %i[virtualbox libvirt].each do |provider|
+    config.vm.provider provider do |p|
+      p.cpus = ENV["CPUS"] || 1
+      p.memory = ENV["MEMORY"] || (mem / 1024 / 4)
+    end
+  end
+
+  %i[virtualbox libvirt].each do |provider|
+    config.vm.provider provider do |p|
       p.cpus = 2
       p.memory = 4096
     end
@@ -34,37 +51,44 @@ Vagrant.configure("2") do |config|
 
   config.vm.provider "virtualbox" do |v|
     v.gui = false
+    v.customize ["modifyvm", :id, "--nictype1", "virtio", "--cableconnected1", "on"]
+    # https://bugs.launchpad.net/cloud-images/+bug/1829625/comments/2
+    v.customize ["modifyvm", :id, "--uart1", "0x3F8", "4"]
+    v.customize ["modifyvm", :id, "--uartmode1", "file", File::NULL]
+    # Enable nested paging for memory management in hardware
+    v.customize ["modifyvm", :id, "--nestedpaging", "on"]
+    # Use large pages to reduce Translation Lookaside Buffers usage
+    v.customize ["modifyvm", :id, "--largepages", "on"]
+    # Use virtual processor identifiers  to accelerate context switching
+    v.customize ["modifyvm", :id, "--vtxvpid", "on"]
   end
 
-  config.vm.provider :libvirt do |v|
-    v.cpu_mode = 'host-passthrough'
+  config.vm.provider :libvirt do |v, override|
+    override.vm.synced_folder "./", "/vagrant", type: "nfs", nfs_version: 4
+    #    v.memorybacking :access, :mode => "shared"
     v.random_hostname = true
-    v.management_network_address = "192.168.121.0/24"
+    v.random_hostname = true
+    v.management_network_address = "10.0.2.0/24"
+    v.management_network_name = "administration"
   end
 
-  if ENV['http_proxy'] != nil and ENV['https_proxy'] != nil
-    if Vagrant.has_plugin?('vagrant-proxyconf')
-      config.proxy.http     = ENV['http_proxy'] || ENV['HTTP_PROXY'] || ""
-      config.proxy.https    = ENV['https_proxy'] || ENV['HTTPS_PROXY'] || ""
-      config.proxy.no_proxy = $no_proxy
-      config.proxy.enabled = { docker: false, git: false }
-    end
+  if !ENV["http_proxy"].nil? && !ENV["https_proxy"].nil? && Vagrant.has_plugin?("vagrant-proxyconf")
+    config.proxy.http = ENV["http_proxy"] || ENV["HTTP_PROXY"] || ""
+    config.proxy.https    = ENV["https_proxy"] || ENV["HTTPS_PROXY"] || ""
+    config.proxy.no_proxy = no_proxy
+    config.proxy.enabled = { docker: false, git: false }
   end
+
+  vagrant_root = File.dirname(__FILE__)
+  config.vm.provision "shell", path: "#{vagrant_root}/_requirements.sh"
   # Install requirements
-  config.vm.provision 'shell', privileged: false, inline: <<-SHELL
-    source /etc/os-release || source /usr/lib/os-release
-    case ${ID,,} in
-        ubuntu|debian)
-            sudo apt-get update
-            sudo apt-get install -y -qq -o=Dpkg::Use-Pty=0 curl
-        ;;
-    esac
+  config.vm.provision "shell", privileged: false, inline: <<-SHELL
     # NOTE: Shorten link -> https://github.com/electrocucaracha/pkg-mgr_scripts
     curl -fsSL http://bit.ly/install_pkg | PKG="docker docker-compose" bash
   SHELL
 
   # Deploy services
-  config.vm.provision 'shell', inline: <<-SHELL
+  config.vm.provision "shell", inline: <<-SHELL
     set -o pipefail
     set -o errexit
 
