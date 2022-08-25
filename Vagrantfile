@@ -25,6 +25,7 @@ Vagrant.configure("2") do |config|
   config.vm.box = "generic/ubuntu2004"
   config.vm.box_check_update = false
   config.vm.synced_folder "./", "/vagrant"
+  config.ssh.forward_agent = true
 
   host = RbConfig::CONFIG["host_os"]
   case host
@@ -54,6 +55,11 @@ Vagrant.configure("2") do |config|
     v.customize ["modifyvm", :id, "--largepages", "on"]
     # Use virtual processor identifiers  to accelerate context switching
     v.customize ["modifyvm", :id, "--vtxvpid", "on"]
+    # Enable IO APIC
+    v.customize ["modifyvm", :id, "--ioapic", "on"]
+    # Support for the SSE4.x instruction is required in some versions of VB.
+    v.customize ["setextradata", :id, "VBoxInternal/CPUM/SSE4.1", "1"]
+    v.customize ["setextradata", :id, "VBoxInternal/CPUM/SSE4.2", "1"]
   end
 
   config.vm.provider :libvirt do |v, override|
@@ -62,6 +68,8 @@ Vagrant.configure("2") do |config|
     v.random_hostname = true
     v.management_network_address = "10.0.2.0/24"
     v.management_network_name = "administration"
+    # Enable IO APIC
+    v.features = ["apic"]
   end
 
   if !ENV["http_proxy"].nil? && !ENV["https_proxy"].nil? && Vagrant.has_plugin?("vagrant-proxyconf")
