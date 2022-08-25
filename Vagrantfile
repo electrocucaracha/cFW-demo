@@ -37,15 +37,8 @@ Vagrant.configure("2") do |config|
   end
   %i[virtualbox libvirt].each do |provider|
     config.vm.provider provider do |p|
-      p.cpus = ENV["CPUS"] || 1
+      p.cpus = ENV["CPUS"] || 2
       p.memory = ENV["MEMORY"] || (mem / 1024 / 4)
-    end
-  end
-
-  %i[virtualbox libvirt].each do |provider|
-    config.vm.provider provider do |p|
-      p.cpus = 2
-      p.memory = 4096
     end
   end
 
@@ -65,7 +58,6 @@ Vagrant.configure("2") do |config|
 
   config.vm.provider :libvirt do |v, override|
     override.vm.synced_folder "./", "/vagrant", type: "nfs", nfs_version: ENV.fetch("VAGRANT_NFS_VERSION", 3)
-    #    v.memorybacking :access, :mode => "shared"
     v.random_hostname = true
     v.random_hostname = true
     v.management_network_address = "10.0.2.0/24"
@@ -91,6 +83,11 @@ Vagrant.configure("2") do |config|
   config.vm.provision "shell", inline: <<-SHELL
     set -o pipefail
     set -o errexit
+
+    if ! grep -q 'vm.nr_hugepages = 1024' /etc/sysctl.conf; then
+        echo 'vm.nr_hugepages = 1024' | tee --append /etc/sysctl.conf
+        sysctl -p
+    fi
 
     cd /vagrant
     docker network create --subnet 10.10.0.0/16 --opt com.docker.network.bridge.name=docker_gwbridge docker_gwbridge
