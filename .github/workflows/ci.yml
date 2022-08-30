@@ -59,3 +59,23 @@ jobs:
         env:
           VAGRANT_DISABLE_VBOXSYMLINKCREATE: 1
         run: vagrant up
+  check-baremetal:
+    name: Check E2E deployment on Ubuntu Bionic Virtual Environment
+    if: >-
+      (
+        github.event_name == 'pull_request_review' &&
+        github.event.review.state == 'approved'
+      ) ||
+      github.event_name != 'pull_request_review'
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install dependencies
+        run: pip install docker-compose
+      - name: Configure environment
+        run: |
+          docker swarm init --advertise-addr 10.0.2.15
+          docker build --no-cache -t vpp:21.10.1 --build-arg VERSION=21.10.1 vpp/
+          docker-compose up -d
+      - name: Check traffic sink page
+        run: curl localhost:667
