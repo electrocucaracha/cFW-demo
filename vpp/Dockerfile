@@ -13,11 +13,5 @@ RUN apt-get update && apt-get install -y -qq --no-install-recommends \
   && curl -L https://packagecloud.io/fdio/release/gpgkey | apt-key add - \
   && mkdir -p /var/log/vpp/ \
   && apt-get update && apt-get install -y -qq --no-install-recommends \
-  vpp=$VERSION-release \
   vpp-plugin-core=$VERSION-release \
-  vpp-plugin-dpdk=$VERSION-release \
   && rm -rf /var/lib/apt/lists/*
-
-COPY startup.conf /etc/vpp/startup.conf
-
-CMD ["/usr/bin/vpp", "-c", "/etc/vpp/startup.conf"]

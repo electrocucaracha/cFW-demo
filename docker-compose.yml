@@ -1,7 +1,7 @@
 ---
 # SPDX-license-identifier: Apache-2.0
 ##############################################################################
-# Copyright (c) 2020
+# Copyright (c) 2020,2022
 # All rights reserved. This program and the accompanying materials
 # are made available under the terms of the Apache License, Version 2.0
 # which accompanies this distribution, and is available at
@@ -11,28 +11,35 @@
 version: '3'
 
 services:
+  vpp-agent:
+    image: ligato/vpp-agent:v3.4.0
+    privileged: true
+    environment:
+      - ETCD_CONFIG=disabled
+    volumes:
+      - vpp-sock:/run/vpp/
+      - pg_streams:/opt/pg_streams/
   packetgen:
     image: packetgen:1.6.0
-    privileged: true
     environment:
       - PROTECTED_NET_CIDR=192.168.20.0/24
       - FW_IPADDR=192.168.10.100
       - SINK_IPADDR=192.168.20.250
-    ports:
-      - 8083:8183
     build:
       context: ./packetgen
     networks:
       unprotected:
         ipv4_address: 192.168.10.200
+    depends_on:
+      - vpp-agent
+    volumes:
+      - vpp-sock:/run/vpp/
+      - pg_streams:/opt/pg_streams/
   firewall:
     image: firewall:1.6.0
-    privileged: true
     environment:
       - DCAE_COLLECTOR_IP=""
       - DCAE_COLLECTOR_PORT=""
-    ports:
-      - 8083
     build:
       context: ./firewall
     networks:
@@ -40,6 +47,10 @@ services:
         ipv4_address: 192.168.10.100
       protected:
         ipv4_address: 192.168.20.100
+    depends_on:
+      - vpp-agent
+    volumes:
+      - vpp-sock:/run/vpp/
   sink:
     image: sink:1.6.0
     cap_add:
@@ -48,12 +59,14 @@ services:
       - UNPROTECTED_NET=192.168.10.0/24
       - PROTECTED_NET_GW=192.168.20.100
     ports:
-      - 8080:667
+      - 667:667
     build:
       context: ./sink
     networks:
       protected:
         ipv4_address: 192.168.20.250
+    depends_on:
+      - packetgen
 
 networks:
   unprotected:
@@ -68,3 +81,7 @@ networks:
       driver: default
       config:
         - subnet: 192.168.20.0/24
+
+volumes:
+  vpp-sock:
+  pg_streams:

@@ -63,8 +63,8 @@ Vagrant.configure("2") do |config|
   end
 
   config.vm.provider :libvirt do |v, override|
-    override.vm.synced_folder "./", "/vagrant", type: "nfs", nfs_version: ENV.fetch("VAGRANT_NFS_VERSION", 3)
-    v.random_hostname = true
+    override.vm.synced_folder "./", "/vagrant", type: "virtiofs"
+    v.memorybacking :access, :mode => "shared"
     v.random_hostname = true
     v.management_network_address = "10.0.2.0/24"
     v.management_network_name = "administration"
@@ -92,13 +92,7 @@ Vagrant.configure("2") do |config|
     set -o pipefail
     set -o errexit
 
-    if ! grep -q 'vm.nr_hugepages = 1024' /etc/sysctl.conf; then
-        echo 'vm.nr_hugepages = 1024' | tee --append /etc/sysctl.conf
-        sysctl -p
-    fi
-
     cd /vagrant
-    docker network create --subnet 10.10.0.0/16 --opt com.docker.network.bridge.name=docker_gwbridge docker_gwbridge
     docker swarm init --advertise-addr 10.0.2.15
     docker build --no-cache -t vpp:21.10.1 --build-arg VERSION=21.10.1 vpp/
     docker-compose up -d
@@ -110,5 +104,8 @@ Vagrant.configure("2") do |config|
     # -d '{"pg-streams":{"pg-stream": [{"id":"fw_udp1", "is-enabled":"true"},{"id":"fw_udp2", "is-enabled":"true"},{"id":"fw_udp3", "is-enabled":"true"},{"id":"fw_udp4", "is-enabled":"true"},{"id":"fw_udp5", "is-enabled":"true"}]}}' \
     # "http://127.0.0.1:8083/restconf/config/sample-plugin:sample-plugin/pg-streams"
   SHELL
-  config.vm.network :forwarded_port, guest: 8080, host: 8080
+  config.trigger.after :up do |trigger|
+    trigger.info = "Traffic sink page:"
+    trigger.run_remote = { inline: "curl localhost:667" }
+  end
 end
