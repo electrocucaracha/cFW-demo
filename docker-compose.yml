@@ -12,6 +12,7 @@ version: '3'
 
 services:
   vpp-agent:
+    restart: always
     image: ligato/vpp-agent:v3.4.0
     privileged: true
     environment:
@@ -20,6 +21,7 @@ services:
       - vpp-sock:/run/vpp/
       - pg_streams:/opt/pg_streams/
   packetgen:
+    restart: always
     image: packetgen:1.6.0
     build:
       context: ./packetgen
@@ -32,6 +34,7 @@ services:
       - vpp-sock:/run/vpp/
       - pg_streams:/opt/pg_streams/
   firewall:
+    restart: always
     image: firewall:1.6.0
     build:
       context: ./firewall
@@ -45,6 +48,7 @@ services:
     volumes:
       - vpp-sock:/run/vpp/
   sink:
+    restart: always
     image: sink:1.6.0
     cap_add:
       - NET_ADMIN
