@@ -45,6 +45,7 @@ Vagrant.configure("2") do |config|
 
   config.vm.provider "virtualbox" do |v|
     v.gui = false
+    # https://docs.oracle.com/en/virtualization/virtualbox/6.0/user/network_performance.html
     v.customize ["modifyvm", :id, "--nictype1", "virtio", "--cableconnected1", "on"]
     # https://bugs.launchpad.net/cloud-images/+bug/1829625/comments/2
     v.customize ["modifyvm", :id, "--uart1", "0x3F8", "4"]
@@ -104,6 +105,7 @@ Vagrant.configure("2") do |config|
     # -d '{"pg-streams":{"pg-stream": [{"id":"fw_udp1", "is-enabled":"true"},{"id":"fw_udp2", "is-enabled":"true"},{"id":"fw_udp3", "is-enabled":"true"},{"id":"fw_udp4", "is-enabled":"true"},{"id":"fw_udp5", "is-enabled":"true"}]}}' \
     # "http://127.0.0.1:8083/restconf/config/sample-plugin:sample-plugin/pg-streams"
   SHELL
+  config.vm.network :forwarded_port, guest: 667, host: 8667
   config.trigger.after :up do |trigger|
     trigger.info = "Traffic sink page:"
     trigger.run_remote = { inline: "curl localhost:667" }
