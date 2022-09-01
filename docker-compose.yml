@@ -33,6 +33,8 @@ services:
     volumes:
       - vpp-sock:/run/vpp/
       - pg_streams:/opt/pg_streams/
+    cap_add:
+      - NET_ADMIN
   firewall:
     restart: always
     image: firewall:1.6.0
@@ -47,6 +49,8 @@ services:
       - vpp-agent
     volumes:
       - vpp-sock:/run/vpp/
+    cap_add:
+      - NET_ADMIN
   sink:
     restart: always
     image: sink:1.6.0
