@@ -8,11 +8,40 @@
 # http://www.apache.org/licenses/LICENSE-2.0
 ##############################################################################
 
-set -o pipefail
+#set -o pipefail
 set -o xtrace
-set -o errexit
+#set -o errexit
 set -o nounset
 
+function setup_nic {
+    local nic=$1
+    local tap_nic=$2
+    local tap=$3
+    local bridge=$4
+
+    ip_addr=$(ip addr show "$nic" | grep inet | awk '{print $2}')
+    hw_addr=$(ip -brief link show "$nic" | awk '{print $3;}')
+    fake_hw_addr=$(
+        echo -n 00
+        dd bs=1 count=5 if=/dev/urandom 2>/dev/null | hexdump -v -e '/1 ":%02X"'
+    )
+
+    # Change MAC address of nic
+    ip link set dev "$nic" down
+    ip link set dev "$nic" address "$fake_hw_addr"
+    #ip addr flush dev "$nic"
+    ip link set dev "$nic" up
+
+    vppctl tap connect "$tap_nic" hwaddr "$hw_addr"
+    vppctl set int ip address "$tap" "$ip_addr"
+    vppctl set int state "$tap" up
+    brctl addbr "$bridge"
+    brctl addif "$bridge" "$tap_nic"
+    brctl addif "$bridge" "$nic"
+    ip link set dev "$bridge" up
+}
+
+# Ensure VPP connection
 attempt_counter=0
 max_attempts=5
 until vppctl show ver; do
@@ -23,30 +52,27 @@ until vppctl show ver; do
     attempt_counter=$((attempt_counter + 1))
     sleep $((attempt_counter * 2))
 done
+ip address show
 
 # Configure VPP for vPacketGenerator
-nic=eth0
-ip_addr=$(ip addr show $nic | grep inet | awk '{print $2}')
-
-vppctl create host-interface name "$nic"
-vppctl set int state "host-$nic" up
-vppctl set int ip address "host-$nic" "$ip_addr"
+setup_nic eth0 tap111 tap-0 br0
 vppctl ip route add "$PROTECTED_NET_CIDR" via "$FW_IPADDR"
+sleep 1
 
-vppctl loop create
-vppctl set int ip address loop0 11.22.33.1/24
-vppctl set int state loop0 up
+ip address show
+brctl show
+vppctl show hardware
+vppctl show int addr
 
 # Install packet streams
 for i in $(seq 1 10); do
-    cat <<EOL >"/opt/pg_streams/stream_fw_udp"
+    cat <<EOL >stream_fw_udp
 packet-generator new {
   name fw_udp$i
   rate 10
   node ip4-input
   size 64-64
   no-recycle
-  interface loop0
   data {
     UDP: ${ip_addr%/*} -> $SINK_IPADDR
     UDP: 15320 -> 8080
@@ -54,9 +80,18 @@ packet-generator new {
   }
 }
 EOL
-    vppctl exec "/opt/pg_streams/stream_fw_udp"
+    vppctl exec stream_fw_udp
 done
-vppctl packet-generator enable
 
 # Start HoneyComb
-/opt/honeycomb/honeycomb
+/opt/honeycomb/honeycomb &>/dev/null &
+disown
+sleep 20
+
+# Enable traffic flows
+while 'true'; do
+    curl -X PUT -H "Authorization: Basic YWRtaW46YWRtaW4=" -H "Content-Type: application/json" -H "Cache-Control: no-cache" -H "Postman-Token: 9005870c-900b-2e2e-0902-ef2009bb0ff7" -d '{"streams": {"active-streams": 10}}' http://localhost:8183/restconf/config/stream-count:stream-count/streams
+    sleep 300
+    curl -X PUT -H "Authorization: Basic YWRtaW46YWRtaW4=" -H "Content-Type: application/json" -H "Cache-Control: no-cache" -H "Postman-Token: 9005870c-900b-2e2e-0902-ef2009bb0ff7" -d '{"streams": {"active-streams": 1}}' http://localhost:8183/restconf/config/stream-count:stream-count/streams
+    sleep 300
+done
