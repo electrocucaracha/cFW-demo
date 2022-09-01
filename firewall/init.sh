@@ -8,11 +8,40 @@
 # http://www.apache.org/licenses/LICENSE-2.0
 ##############################################################################
 
-set -o pipefail
+#set -o pipefail
 set -o xtrace
-set -o errexit
+#set -o errexit
 set -o nounset
 
+function setup_nic {
+    local nic=$1
+    local tap_nic=$2
+    local tap=$3
+    local bridge=$4
+
+    ip_addr=$(ip addr show "$nic" | grep inet | awk '{print $2}')
+    hw_addr=$(ip -brief link show "$nic" | awk '{print $3;}')
+    fake_hw_addr=$(
+        echo -n 00
+        dd bs=1 count=5 if=/dev/urandom 2>/dev/null | hexdump -v -e '/1 ":%02X"'
+    )
+
+    # Change MAC address of nic
+    ip link set dev "$nic" down
+    ip link set dev "$nic" address "$fake_hw_addr"
+    #ip addr flush dev "$nic"
+    ip link set dev "$nic" up
+
+    vppctl tap connect "$tap_nic" hwaddr "$hw_addr"
+    vppctl set int ip address "$tap" "$ip_addr"
+    vppctl set int state "$tap" up
+    brctl addbr "$bridge"
+    brctl addif "$bridge" "$tap_nic"
+    brctl addif "$bridge" "$nic"
+    ip link set dev "$bridge" up
+}
+
+# Ensure VPP connection
 attempt_counter=0
 max_attempts=5
 until vppctl show ver; do
@@ -25,19 +54,11 @@ until vppctl show ver; do
 done
 
 # Configure VPP for vFirewall
-nic_protected=eth1
-nic_unprotected=eth2
-ip_protected_addr=$(ip addr show $nic_protected | grep inet | awk '{print $2}')
-ip_unprotected_addr=$(ip addr show $nic_unprotected | grep inet | awk '{print $2}')
-
-vppctl create host-interface name "$nic_protected"
-vppctl create host-interface name "$nic_unprotected"
-
-vppctl set int ip address "host-$nic_protected" "$ip_protected_addr"
-vppctl set int ip address "host-$nic_unprotected" "$ip_unprotected_addr"
-
-vppctl set int state "host-$nic_protected" up
-vppctl set int state "host-$nic_unprotected" up
+setup_nic eth0 tap111 tap-0 br0
+setup_nic eth1 tap222 tap-1 br1
+brctl show
+vppctl show hardware
+vppctl show int addr
 
 # Start HoneyComb
 #/opt/honeycomb/honeycomb &>/dev/null &disown
