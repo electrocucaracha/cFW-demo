@@ -77,5 +77,8 @@ jobs:
           docker swarm init --advertise-addr 10.0.2.15
           docker build --no-cache -t vpp:21.10.1 --build-arg VERSION=21.10.1 vpp/
           docker-compose up -d
+      - name: Check docker logs
+        if: always()
+        run: docker-compose logs
       - name: Check traffic sink page
         run: curl localhost:667
