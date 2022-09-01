@@ -21,10 +21,6 @@ services:
       - pg_streams:/opt/pg_streams/
   packetgen:
     image: packetgen:1.6.0
-    environment:
-      - PROTECTED_NET_CIDR=192.168.20.0/24
-      - FW_IPADDR=192.168.10.100
-      - SINK_IPADDR=192.168.20.250
     build:
       context: ./packetgen
     networks:
@@ -37,9 +33,6 @@ services:
       - pg_streams:/opt/pg_streams/
   firewall:
     image: firewall:1.6.0
-    environment:
-      - DCAE_COLLECTOR_IP=""
-      - DCAE_COLLECTOR_PORT=""
     build:
       context: ./firewall
     networks:
@@ -55,9 +48,6 @@ services:
     image: sink:1.6.0
     cap_add:
       - NET_ADMIN
-    environment:
-      - UNPROTECTED_NET=192.168.10.0/24
-      - PROTECTED_NET_GW=192.168.20.100
     ports:
       - 667:667
     build:
