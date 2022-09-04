@@ -66,7 +66,7 @@ vppctl show int addr
 
 # Install packet streams
 for i in $(seq 1 10); do
-    cat <<EOL >stream_fw_udp
+    cat <<EOL >/opt/pg_streams/stream_fw_udp
 packet-generator new {
   name fw_udp$i
   rate 10
@@ -80,7 +80,7 @@ packet-generator new {
   }
 }
 EOL
-    vppctl exec stream_fw_udp
+    vppctl exec /opt/pg_streams/stream_fw_udp
 done
 
 # Start HoneyComb
