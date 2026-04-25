@@ -11,7 +11,7 @@
 extends: default
 
 yaml-files:
-  - '*.yml'
+  - "*.yml"
 
 ignore: |
   .tox/

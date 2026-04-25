@@ -13,7 +13,7 @@ name: Check All
 on:
   push:
     paths:
-      - '**.sh'
+      - "**.sh"
   pull_request_review:
     types:
       - submitted

@@ -35,5 +35,7 @@ RUN apt-get update && apt-get install -y -qq --no-install-recommends \
   && rm -rf /var/lib/apt/lists/* \
   && mkdir -p /opt/pg_streams
 
+HEALTHCHECK NONE
+
 ENTRYPOINT ["/bin/bash"]
 CMD ["/opt/init.sh"]
