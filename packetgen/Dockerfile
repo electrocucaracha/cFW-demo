@@ -3,6 +3,7 @@ FROM ubuntu:18.04 as builder
 ENV demo_artifacts_version "1.6.0"
 ENV repo_url "https://nexus.onap.org/content/repositories/releases/org/onap/demo/vnf/"
 
+# hadolint ignore=DL3008
 RUN apt-get update && apt-get install -y -qq --no-install-recommends \
   wget \
   ca-certificates \
@@ -26,6 +27,7 @@ ENV PROTECTED_NET_CIDR "192.168.20.0/24"
 ENV FW_IPADDR "192.168.10.100"
 ENV SINK_IPADDR "192.168.20.250"
 
+# hadolint ignore=DL3008
 RUN apt-get update && apt-get install -y -qq --no-install-recommends \
   openjdk-8-jre \
   iproute2 \

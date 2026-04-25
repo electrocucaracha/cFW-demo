@@ -3,6 +3,7 @@ FROM ubuntu:18.04 as builder
 ENV demo_artifacts_version "1.6.0"
 ENV repo_url "https://nexus.onap.org/content/repositories/releases/org/onap/demo/vnf/"
 
+# hadolint ignore=DL3008
 RUN apt-get update && apt-get install -y -qq --no-install-recommends \
   wget \
   ca-certificates \
@@ -42,6 +43,7 @@ COPY init.sh /opt/init.sh
 ENV DCAE_COLLECTOR_IP ""
 ENV DCAE_COLLECTOR_PORT ""
 
+# hadolint ignore=DL3008
 RUN apt-get update && apt-get install -y -qq --no-install-recommends \
   openjdk-8-jre \
   iproute2 \

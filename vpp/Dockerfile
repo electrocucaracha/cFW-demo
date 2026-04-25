@@ -3,6 +3,7 @@ FROM ubuntu:18.04
 ARG VERSION=21.10.1
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+# hadolint ignore=DL3008
 RUN apt-get update && apt-get install -y -qq --no-install-recommends \
   curl \
   ca-certificates \
