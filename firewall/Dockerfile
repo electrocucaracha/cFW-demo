@@ -4,12 +4,12 @@ ENV demo_artifacts_version "1.6.0"
 ENV repo_url "https://nexus.onap.org/content/repositories/releases/org/onap/demo/vnf/"
 
 RUN apt-get update && apt-get install -y -qq --no-install-recommends \
-  wget=1.19.4-1ubuntu2.2 \
-  ca-certificates=20211016~18.04.1 \
-  make=4.1-9.1ubuntu1 \
-  gcc=4:7.4.0-1ubuntu2.3 \
-  libc6-dev=2.27-3ubuntu1.6\
-  libcurl4-gnutls-dev=7.58.0-2ubuntu3.20 \
+  wget \
+  ca-certificates \
+  make \
+  gcc \
+  libc6-dev \
+  libcurl4-gnutls-dev \
   && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /opt
@@ -43,11 +43,11 @@ ENV DCAE_COLLECTOR_IP ""
 ENV DCAE_COLLECTOR_PORT ""
 
 RUN apt-get update && apt-get install -y -qq --no-install-recommends \
-  openjdk-8-jre=8u342-b07-0ubuntu1~18.04 \
-  iproute2=4.15.0-2ubuntu1.3 \
-  libcurl4-gnutls-dev=7.58.0-2ubuntu3.20 \
-  bsdmainutils=11.1.2ubuntu1 \
-  bridge-utils=1.5-15ubuntu1 \
+  openjdk-8-jre \
+  iproute2 \
+  libcurl4-gnutls-dev \
+  bsdmainutils \
+  bridge-utils \
   && rm -rf /var/lib/apt/lists/*
 
 ENTRYPOINT ["/bin/bash"]
