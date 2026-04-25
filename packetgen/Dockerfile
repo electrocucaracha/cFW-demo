@@ -3,9 +3,10 @@ FROM ubuntu:18.04 as builder
 ENV demo_artifacts_version "1.6.0"
 ENV repo_url "https://nexus.onap.org/content/repositories/releases/org/onap/demo/vnf/"
 
+# hadolint ignore=DL3008
 RUN apt-get update && apt-get install -y -qq --no-install-recommends \
-  wget=1.19.4-1ubuntu2.2 \
-  ca-certificates=20211016~18.04.1 \
+  wget \
+  ca-certificates \
   && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /opt
@@ -26,12 +27,13 @@ ENV PROTECTED_NET_CIDR "192.168.20.0/24"
 ENV FW_IPADDR "192.168.10.100"
 ENV SINK_IPADDR "192.168.20.250"
 
+# hadolint ignore=DL3008
 RUN apt-get update && apt-get install -y -qq --no-install-recommends \
-  openjdk-8-jre=8u342-b07-0ubuntu1~18.04 \
-  iproute2=4.15.0-2ubuntu1.3 \
-  libcurl4-gnutls-dev=7.58.0-2ubuntu3.20 \
-  bsdmainutils=11.1.2ubuntu1 \
-  bridge-utils=1.5-15ubuntu1 \
+  openjdk-8-jre \
+  iproute2 \
+  libcurl4-gnutls-dev \
+  bsdmainutils \
+  bridge-utils \
   && rm -rf /var/lib/apt/lists/* \
   && mkdir -p /opt/pg_streams
 
