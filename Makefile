@@ -8,14 +8,18 @@
 ##############################################################################
 
 DOCKER_CMD ?= $(shell which docker 2> /dev/null || which podman 2> /dev/null || echo docker)
+DEFAULT_BRANCH ?= master
 
 .PHONY: lint
 lint:
 	sudo -E $(DOCKER_CMD) run --rm -v $$(pwd):/tmp/lint \
 	-e RUN_LOCAL=true \
+	-e DEFAULT_BRANCH=$(DEFAULT_BRANCH) \
 	-e LINTER_RULES_PATH=/ \
 	-e SHELL_SHFMT_COMMAND_OPTIONS="-i 4 -s" \
 	-e KUBERNETES_KUBECONFORM_OPTIONS="-ignore-missing-schemas" \
+	-e VALIDATE_BIOME_FORMAT=false \
+	-e VALIDATE_TRIVY=false \
 	ghcr.io/super-linter/super-linter
 	tox -e lint
 

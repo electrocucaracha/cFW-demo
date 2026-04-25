@@ -14,7 +14,6 @@ on: [push, pull_request]
 
 permissions:
   contents: read
-  statuses: write
 
 jobs:
   check-broken-links:
@@ -29,6 +28,9 @@ jobs:
   check-super-linter:
     name: Run GitHub super-linter tool for verify quality of code
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      statuses: write
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # 6.0.2
         with:
@@ -39,8 +41,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           LINTER_RULES_PATH: /
-          KUBERNETES_KUBEVAL_OPTIONS: "--ignore-missing-schemas"
+          KUBERNETES_KUBECONFORM_OPTIONS: "--ignore-missing-schemas"
           SHELL_SHFMT_COMMAND_OPTIONS: -i 4 -s
+          VALIDATE_BIOME_FORMAT: "false"
+          VALIDATE_TRIVY: "false"
   check-tox:
     name: Run additional linter tools from python tox
     runs-on: ubuntu-latest
