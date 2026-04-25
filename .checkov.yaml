@@ -1,0 +1,4 @@
+# CKV_DOCKER_3: VPP network-function containers require root privileges
+# for vppctl, ip link, brctl, and ip route operations.
+skip-check:
+  - CKV_DOCKER_3
