@@ -13,15 +13,15 @@ name: Check End-to-End
 on:
   push:
     paths:
-      - '**.yml'
-      - '**/Dockerfile'
-      - '**.sh'
-      - '!.github/*'
+      - "**.yml"
+      - "**/Dockerfile"
+      - "**.sh"
+      - "!.github/*"
   pull_request_review:
     types:
       - submitted
   schedule:
-    - cron: '0 0 * * 5'
+    - cron: "0 0 * * 5"
 
 jobs:
   check-ci-vm:

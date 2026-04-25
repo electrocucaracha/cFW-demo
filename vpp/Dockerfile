@@ -15,3 +15,5 @@ RUN apt-get update && apt-get install -y -qq --no-install-recommends \
   && apt-get update && apt-get install -y -qq --no-install-recommends \
   vpp-plugin-core=$VERSION-release \
   && rm -rf /var/lib/apt/lists/*
+
+HEALTHCHECK NONE

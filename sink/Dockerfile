@@ -12,5 +12,7 @@ RUN apt-get update && apt-get install -y -qq --no-install-recommends \
 
 EXPOSE 667
 
+HEALTHCHECK NONE
+
 ENTRYPOINT ["/bin/bash"]
 CMD ["/opt/init.sh"]
