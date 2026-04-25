@@ -17,7 +17,7 @@ lint:
 	-e DEFAULT_BRANCH=$(DEFAULT_BRANCH) \
 	-e LINTER_RULES_PATH=/ \
 	-e SHELL_SHFMT_COMMAND_OPTIONS="-i 4 -s" \
-	-e KUBERNETES_KUBECONFORM_OPTIONS="-ignore-missing-schemas" \
+	-e KUBERNETES_KUBECONFORM_OPTIONS="--ignore-missing-schemas" \
 	-e VALIDATE_BIOME_FORMAT=false \
 	-e VALIDATE_TRIVY=false \
 	ghcr.io/super-linter/super-linter
