@@ -68,16 +68,16 @@ vppctl show int addr
 for i in $(seq 1 10); do
     cat <<EOL >/opt/pg_streams/stream_fw_udp
 packet-generator new {
-  name fw_udp$i
-  rate 10
-  node ip4-input
-  size 64-64
-  no-recycle
-  data {
-    UDP: ${ip_addr%/*} -> $SINK_IPADDR
-    UDP: 15320 -> 8080
-    length 128 checksum 0 incrementing 1
-  }
+    name fw_udp$i
+    rate 10
+    node ip4-input
+    size 64-64
+    no-recycle
+    data {
+        UDP: ${ip_addr%/*} -> $SINK_IPADDR
+        UDP: 15320 -> 8080
+        length 128 checksum 0 incrementing 1
+    }
 }
 EOL
     vppctl exec /opt/pg_streams/stream_fw_udp
