@@ -50,5 +50,7 @@ RUN apt-get update && apt-get install -y -qq --no-install-recommends \
   bridge-utils=1.5-15ubuntu1 \
   && rm -rf /var/lib/apt/lists/*
 
+HEALTHCHECK NONE
+
 ENTRYPOINT ["/bin/bash"]
 CMD ["/opt/init.sh"]

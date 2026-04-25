@@ -1,0 +1,3 @@
+# DS-0002: These containers configure VPP network functions and require root
+# privileges for operations like vppctl, ip link, brctl, and ip route.
+DS-0002
