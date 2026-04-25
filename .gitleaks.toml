@@ -1,0 +1,5 @@
+title = "gitleaks config"
+
+[allowlist]
+  description = "Allow known test credentials (admin:admin base64)"
+  regexes = ["YWRtaW46YWRtaW4="]
