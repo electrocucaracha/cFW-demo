@@ -1,5 +1,6 @@
 title = "gitleaks config"
 
 [allowlist]
-  description = "Allow known test credentials (admin:admin base64)"
+  description = "Allow known test credentials (admin:admin base64) only in this config file"
+  paths = ['''^\.gitleaks\.toml$''']
   regexes = ["YWRtaW46YWRtaW4="]
